@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Electron builds
+dist/
+release/
+
+# Build artifacts
+*.exe
+*.msi
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Environment files
+.env
+
+# Editor files
+.vscode/
