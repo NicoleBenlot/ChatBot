@@ -278,7 +278,7 @@ function renderMarkdown(raw) {
         const label = escapeHtml(block.lang) || 'code';
         html += `<pre class="code-block"><div class="code-block-header"><span>${label}</span><button type="button" class="copy-code-btn">Copy</button></div><code>${escapedCode}</code></pre>`;
       } else {
-        html += `<pre class="code-block-plain"><code>${escapedCode}</code></pre>`;
+        html += `<span class="code-block-plain">${escapedCode}</span>`;
       }
     } else if (headerMatch) {
       flushParagraph();

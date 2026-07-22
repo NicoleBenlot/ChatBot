@@ -453,18 +453,19 @@ button.icon-btn:hover {
 }
 
 /* Plain (unstyled) code, shown instead of .code-block when the
-   "Styled code blocks" setting is turned off */
+   "Styled code blocks" setting is turned off. Blends fully into normal
+   paragraph text — no monospace font, no background box — just the
+   code's own line breaks and spacing preserved. */
 .msg-assistant .code-block-plain {
   display: block;
-  background: var(--bubble-user);
-  border-radius: 6px;
-  margin: 10px 0;
-  padding: 10px 12px;
-  overflow-x: auto;
-  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
-  font-size: 13px;
-  color: var(--text);
-  white-space: pre;
+  margin: 0 0 10px 0;
+  padding: 0;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Composer */
