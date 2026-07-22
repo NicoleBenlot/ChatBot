@@ -14,9 +14,19 @@
   "build": {
     "appId": "com.local.chatbot",
     "productName": "ChatBot",
+    "files": [
+      "main.js",
+      "preload.js",
+      "loading.js",
+      "chatbot.js",
+      "chatbot.html",
+      "chatbot.css",
+      "favicon.ico",
+      "package.json"
+    ],
     "win": {
       "target": "nsis",
-      "icon": "icon.png"
+      "icon": "favicon.ico"
     }
   }
 }
