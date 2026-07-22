@@ -16,7 +16,7 @@
     "productName": "ChatBot",
     "win": {
       "target": "nsis",
-      "icon": "favicon.ico"
+      "icon": "icon.png"
     }
   }
 }
