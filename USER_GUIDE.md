@@ -26,17 +26,22 @@ ollama --version
 
 ---
 
-# 2. Start Ollama
+# 2. Starting Ollama
 
-Before using ChatBot, start the Ollama server.
+You don't need to do anything here — ChatBot handles it for you.
 
-Open Command Prompt:
+When you open ChatBot:
 
-```bash
-ollama serve
-```
+1. It checks that Ollama is installed
+2. It checks if the Ollama server is already running
+3. If it isn't, ChatBot starts it in the background automatically
+4. A loading screen shows the current status until the server is ready
 
-Keep this window running.
+You'll no longer need to open a separate Command Prompt window and run `ollama serve` yourself.
+
+When you close ChatBot, it also shuts down the Ollama server — but only the one it started. If Ollama was already running before you opened ChatBot, it's left alone.
+
+If the loading screen shows an error (for example, Ollama isn't installed), install or fix Ollama and click **Retry** — no need to restart the app.
 
 ---
 
@@ -163,9 +168,10 @@ ollama rm llama3.2
 ## Selecting a model
 
 1. Open ChatBot
-2. Wait for models to load
-3. Select a model from the dropdown
-4. Start chatting
+2. Wait for the loading screen to confirm the Ollama server is running
+3. Wait for models to load in the dropdown
+4. Select a model
+5. Start chatting
 
 ---
 
@@ -188,15 +194,19 @@ Examples of vision models:
 
 # Troubleshooting
 
-## ChatBot cannot connect to Ollama
+## ChatBot is stuck on the loading screen or shows an error
 
-Check that Ollama is running:
+ChatBot tries to start Ollama for you automatically, and the loading text tells you what it's doing at each step. If it shows an error:
+
+- Confirm Ollama is installed and on your system `PATH`:
 
 ```bash
-ollama serve
+ollama --version
 ```
 
-Test the API:
+- Click **Retry** on the loading screen once it's fixed — you don't need to restart ChatBot.
+
+If you'd rather check things manually:
 
 ```bash
 curl http://localhost:11434/api/tags
