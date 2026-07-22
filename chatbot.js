@@ -12,6 +12,7 @@ const ollamaUrlInput = document.getElementById('ollamaUrl');
 const systemPromptInput = document.getElementById('systemPrompt');
 const temperatureInput = document.getElementById('temperatureInput');
 const temperatureValueEl = document.getElementById('temperatureValue');
+const codeStyleToggle = document.getElementById('codeStyleToggle');
 const newChatBtn = document.getElementById('newChatBtn');
 const historyListEl = document.getElementById('historyList');
 
@@ -64,6 +65,9 @@ const settingsReadyPromise = (async () => {
       temperatureInput.value = s.temperature;
       temperatureValueEl.textContent = s.temperature;
     }
+    if (s && typeof s.styledCodeBlocks === 'boolean') {
+      codeStyleToggle.checked = s.styledCodeBlocks;
+    }
   } catch (e) {
     // fall back to field defaults already in the HTML
   }
@@ -74,7 +78,8 @@ function persistSettings() {
   window.settingsBridge.save({
     ollamaUrl: ollamaUrlInput.value,
     systemPrompt: systemPromptInput.value,
-    temperature: parseFloat(temperatureInput.value)
+    temperature: parseFloat(temperatureInput.value),
+    styledCodeBlocks: codeStyleToggle.checked
   });
 }
 ollamaUrlInput.addEventListener('change', persistSettings);
@@ -83,6 +88,14 @@ temperatureInput.addEventListener('input', () => {
   temperatureValueEl.textContent = temperatureInput.value;
 });
 temperatureInput.addEventListener('change', persistSettings);
+codeStyleToggle.addEventListener('change', () => {
+  persistSettings();
+  // Re-render whatever's currently on screen so the change is visible
+  // immediately, without needing to reload or resend anything. Skip
+  // this while a response is actively streaming in, since that would
+  // tear down the DOM element the stream is currently writing into.
+  if (!isStreaming) renderConversationMessages(currentConversation);
+});
 
 async function loadModels() {
   try {
@@ -261,8 +274,12 @@ function renderMarkdown(raw) {
       closeList();
       const block = codeBlocks[Number(codeholderMatch[1])];
       const escapedCode = escapeHtml(block.code);
-      const label = escapeHtml(block.lang) || 'code';
-      html += `<pre class="code-block"><div class="code-block-header"><span>${label}</span><button type="button" class="copy-code-btn">Copy</button></div><code>${escapedCode}</code></pre>`;
+      if (codeStyleToggle.checked) {
+        const label = escapeHtml(block.lang) || 'code';
+        html += `<pre class="code-block"><div class="code-block-header"><span>${label}</span><button type="button" class="copy-code-btn">Copy</button></div><code>${escapedCode}</code></pre>`;
+      } else {
+        html += `<pre class="code-block-plain"><code>${escapedCode}</code></pre>`;
+      }
     } else if (headerMatch) {
       flushParagraph();
       closeList();
@@ -530,6 +547,25 @@ async function send() {
     const decoder = new TextDecoder();
     let buffer = '';
 
+    // renderMarkdown() reprocesses the ENTIRE accumulated response text
+    // (regex parsing, escaping, list handling, etc.) every time it's
+    // called. Calling it on every single streamed token means the cost
+    // grows with the response length and can noticeably lag behind raw
+    // token generation on longer answers. Instead, batch DOM updates to
+    // once per animation frame — the model can't emit tokens faster than
+    // the eye can perceive a repaint anyway, so nothing looks different,
+    // it just does far less redundant work.
+    let renderScheduled = false;
+    function scheduleRender() {
+      if (renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(() => {
+        assistantEl.innerHTML = renderMarkdown(fullText);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        renderScheduled = false;
+      });
+    }
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -546,12 +582,15 @@ async function send() {
               setStatus('Thinking…'); // first token arrived — model's loaded, back to normal status
             }
             fullText += json.message.content;
-            assistantEl.innerHTML = renderMarkdown(fullText);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+            scheduleRender();
           }
         } catch (e) { /* partial line, ignore */ }
       }
     }
+    // Final render happens synchronously (not waiting on the next
+    // animation frame) so the very last chunk is guaranteed to show
+    // immediately, even if a frame hadn't fired yet.
+    assistantEl.innerHTML = renderMarkdown(fullText);
     assistantEl.classList.remove('pending');
     currentConversation.messages.push({ role: 'assistant', content: fullText });
     saveCurrentConversation();

@@ -161,6 +161,18 @@ button.icon-btn:hover {
   margin: 6px 0 2px 0;
   accent-color: var(--accent);
 }
+#settingsPanel .field-row label[for] {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 13px;
+  color: var(--text);
+}
+#settingsPanel input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 
 /* Layout: sidebar + chat column */
 .app-body {
@@ -438,6 +450,21 @@ button.icon-btn:hover {
   padding: 12px 14px;
   white-space: pre;
   overflow-x: auto;
+}
+
+/* Plain (unstyled) code, shown instead of .code-block when the
+   "Styled code blocks" setting is turned off */
+.msg-assistant .code-block-plain {
+  display: block;
+  background: var(--bubble-user);
+  border-radius: 6px;
+  margin: 10px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 13px;
+  color: var(--text);
+  white-space: pre;
 }
 
 /* Composer */
