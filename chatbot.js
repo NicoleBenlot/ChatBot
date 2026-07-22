@@ -22,6 +22,14 @@ let pendingImages = []; // array of base64 strings (no prefix)
 let isStreaming = false;
 let activeAbortController = null;
 
+// Models Ollama has already loaded into memory and answered with at
+// least once this session. A model's first request after app launch
+// (or its first request after being unloaded/idle) has to wait for
+// Ollama to read the weights off disk, which can take anywhere from a
+// few seconds to well over a minute depending on model size and
+// hardware — that's not the app hanging, just the model loading.
+const warmedModels = new Set();
+
 function newConversationObject() {
   return { id: null, title: null, model: null, messages: [] };
 }
@@ -112,6 +120,16 @@ window.addEventListener('ollama-ready', async () => {
   loadModels();
 }, { once: true });
 ollamaUrlInput.addEventListener('change', loadModels);
+
+modelSelect.addEventListener('change', () => {
+  if (isStreaming) return; // don't stomp on an in-progress "Thinking…"/error status
+  const model = modelSelect.value;
+  if (model && !warmedModels.has(model)) {
+    setStatus(`Switched to ${model} — its first reply may take longer while Ollama loads it into memory.`);
+  } else {
+    setStatus('');
+  }
+});
 
 function autoGrow() {
   promptInput.style.height = 'auto';
@@ -299,7 +317,7 @@ messagesEl.addEventListener('click', (e) => {
 
 function clearMessagesDOM() {
   messagesEl.innerHTML = `<div class="empty-state" id="emptyState">
-    <img class="empty-state-icon" src="favicon.ico" alt="">
+    <img class="empty-state-icon" src="icon.png" alt="">
     <h2>Welcome to ChatBot</h2>
     <p>Ask anything — everything runs locally through Ollama.</p>
   </div>`;
@@ -351,7 +369,8 @@ async function saveCurrentConversation() {
   if (currentConversation.messages.length === 0) return;
   if (!currentConversation.title) {
     const firstUserMsg = currentConversation.messages.find(m => m.role === 'user');
-    currentConversation.title = ((firstUserMsg && firstUserMsg.content) || 'New chat').slice(0, 60);
+    const raw = (firstUserMsg && firstUserMsg.content) || 'New chat';
+    currentConversation.title = raw.replace(/\s+/g, ' ').trim().slice(0, 60) || 'New chat';
   }
   currentConversation.model = modelSelect.value || currentConversation.model;
   try {
@@ -362,48 +381,6 @@ async function saveCurrentConversation() {
     refreshHistoryList();
   } catch (e) {
     // Non-fatal — chat continues to work even if a save fails
-  }
-}
-
-// Ask the model itself for a short title after the first exchange,
-// instead of just truncating the user's first message. Runs in the
-// background and silently keeps the truncated fallback title if it
-// fails for any reason.
-async function generateTitle() {
-  const model = modelSelect.value;
-  if (!model) return;
-  const firstUser = currentConversation.messages.find(m => m.role === 'user');
-  const firstAssistant = currentConversation.messages.find(m => m.role === 'assistant');
-  if (!firstUser) return;
-
-  try {
-    const res = await fetch(ollamaUrl() + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        stream: false,
-        messages: [
-          {
-            role: 'system',
-            content: 'Generate a short, plain title (3-6 words) summarizing this conversation. Respond with only the title text — no quotes, no trailing punctuation, no explanation.'
-          },
-          { role: 'user', content: firstUser.content },
-          ...(firstAssistant ? [{ role: 'assistant', content: firstAssistant.content }] : [])
-        ],
-        options: { temperature: 0.3 }
-      })
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    let title = ((data.message && data.message.content) || '').trim();
-    title = title.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[.!?]+$/, '').trim();
-    if (title) {
-      currentConversation.title = title.slice(0, 60);
-      await saveCurrentConversation();
-    }
-  } catch (e) {
-    // Silent — the truncated fallback title saved earlier stays as-is
   }
 }
 
@@ -516,7 +493,8 @@ async function send() {
   renderChips();
   promptInput.value = '';
   autoGrow();
-  setStatus('Thinking…');
+  const isColdStart = !warmedModels.has(model);
+  setStatus(isColdStart ? `Loading ${model} into memory — first reply can take a bit…` : 'Thinking…');
 
   const assistantWrap = addMessageToDOM('assistant');
   const assistantEl = assistantWrap.querySelector('.msg-assistant');
@@ -563,6 +541,10 @@ async function send() {
         try {
           const json = JSON.parse(line);
           if (json.message && json.message.content) {
+            if (!warmedModels.has(model)) {
+              warmedModels.add(model);
+              setStatus('Thinking…'); // first token arrived — model's loaded, back to normal status
+            }
             fullText += json.message.content;
             assistantEl.innerHTML = renderMarkdown(fullText);
             messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -574,9 +556,6 @@ async function send() {
     currentConversation.messages.push({ role: 'assistant', content: fullText });
     saveCurrentConversation();
     setStatus('');
-    if (currentConversation.messages.length === 2) {
-      generateTitle();
-    }
   } catch (err) {
     assistantEl.classList.remove('pending');
     if (err.name === 'AbortError') {
