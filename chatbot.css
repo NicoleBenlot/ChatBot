@@ -35,6 +35,7 @@ header {
   padding: 14px 22px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  background: var(--panel);
 }
 .brand {
   display: flex;
@@ -80,6 +81,7 @@ button.icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 button.icon-btn:hover {
   background: var(--border);
@@ -220,14 +222,18 @@ button.icon-btn:hover {
   padding: 10px 22px 20px 22px;
 }
 .composer {
-  max-width: 720px;
+  max-width: 680px;
   margin: 0 auto;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 18px;
   box-shadow: var(--bubble-shadow);
-  padding: 10px 12px;
-  transition: border-color 0.15s ease;
+  padding: 8px 10px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.composer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.12), var(--bubble-shadow);
 }
 .composer.drag-over {
   border-color: var(--accent);
@@ -237,6 +243,9 @@ button.icon-btn:hover {
   gap: 8px;
   flex-wrap: wrap;
   padding: 2px 4px 8px 4px;
+}
+.chips:empty {
+  display: none;
 }
 .chip {
   position: relative;
@@ -283,7 +292,7 @@ button.icon-btn:hover {
   font-size: 14.5px;
   font-family: inherit;
   max-height: 160px;
-  padding: 6px 4px;
+  padding: 5px 4px;
   line-height: 1.4;
 }
 #promptInput::placeholder {
@@ -301,6 +310,10 @@ button.icon-btn:hover {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+#sendBtn:active {
+  transform: scale(0.94);
 }
 #sendBtn:hover {
   background: var(--accent-hover);
@@ -322,10 +335,17 @@ button.icon-btn:hover {
   color: #c0553d;
 }
 
-/* Loading screen */
+/* App root */
+#appRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 #appRoot.hidden {
   display: none;
 }
+
+/* Loading screen */
 #loadingScreen {
   position: fixed;
   inset: 0;
