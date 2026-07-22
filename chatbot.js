@@ -365,6 +365,48 @@ async function saveCurrentConversation() {
   }
 }
 
+// Ask the model itself for a short title after the first exchange,
+// instead of just truncating the user's first message. Runs in the
+// background and silently keeps the truncated fallback title if it
+// fails for any reason.
+async function generateTitle() {
+  const model = modelSelect.value;
+  if (!model) return;
+  const firstUser = currentConversation.messages.find(m => m.role === 'user');
+  const firstAssistant = currentConversation.messages.find(m => m.role === 'assistant');
+  if (!firstUser) return;
+
+  try {
+    const res = await fetch(ollamaUrl() + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        stream: false,
+        messages: [
+          {
+            role: 'system',
+            content: 'Generate a short, plain title (3-6 words) summarizing this conversation. Respond with only the title text — no quotes, no trailing punctuation, no explanation.'
+          },
+          { role: 'user', content: firstUser.content },
+          ...(firstAssistant ? [{ role: 'assistant', content: firstAssistant.content }] : [])
+        ],
+        options: { temperature: 0.3 }
+      })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    let title = ((data.message && data.message.content) || '').trim();
+    title = title.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[.!?]+$/, '').trim();
+    if (title) {
+      currentConversation.title = title.slice(0, 60);
+      await saveCurrentConversation();
+    }
+  } catch (e) {
+    // Silent — the truncated fallback title saved earlier stays as-is
+  }
+}
+
 function setActiveHistoryItem(id) {
   document.querySelectorAll('.history-item').forEach(el => {
     el.classList.toggle('active', el.dataset.id === id);
@@ -532,6 +574,9 @@ async function send() {
     currentConversation.messages.push({ role: 'assistant', content: fullText });
     saveCurrentConversation();
     setStatus('');
+    if (currentConversation.messages.length === 2) {
+      generateTitle();
+    }
   } catch (err) {
     assistantEl.classList.remove('pending');
     if (err.name === 'AbortError') {
