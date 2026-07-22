@@ -45,12 +45,11 @@ header {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-.brand .dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent);
+.brand .brand-icon {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  border-radius: 5px;
 }
 .header-controls {
   display: flex;
@@ -197,13 +196,12 @@ button.icon-btn:hover {
   color: var(--muted);
   padding: 0 24px;
 }
-.empty-state .dot {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--accent);
+.empty-state .empty-state-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   margin: 0 auto 16px auto;
-  opacity: 0.9;
+  display: block;
 }
 .empty-state h2 {
   color: var(--text);

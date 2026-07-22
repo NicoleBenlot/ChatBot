@@ -54,11 +54,46 @@ function checkServerUp() {
     });
 }
 
-// Is the `ollama` executable available on PATH at all?
-function checkOllamaInstalled() {
+const fs = require("fs");
+
+// Where Ollama typically lands if it's installed but not (yet) on PATH.
+// GUI-launched apps on Windows especially can end up with a stale PATH
+// that doesn't include it, even though a terminal would find it fine.
+function fallbackOllamaPaths() {
+    if (process.platform === "win32") {
+        const localAppData = process.env.LOCALAPPDATA || "";
+        return [path.join(localAppData, "Programs", "Ollama", "ollama.exe")];
+    }
+    if (process.platform === "darwin") {
+        return [
+            "/usr/local/bin/ollama",
+            "/opt/homebrew/bin/ollama",
+            "/Applications/Ollama.app/Contents/Resources/ollama"
+        ];
+    }
+    return ["/usr/local/bin/ollama", "/usr/bin/ollama"];
+}
+
+// Resolves the ollama command to run. Returns a command string (either
+// "ollama" if it's on PATH, or an absolute path found as a fallback),
+// or null if it can't be found anywhere.
+function resolveOllamaCommand() {
     return new Promise((resolve) => {
         const cmd = process.platform === "win32" ? "where ollama" : "which ollama";
-        exec(cmd, (err) => resolve(!err));
+        exec(cmd, (err, stdout) => {
+            if (!err && stdout && stdout.trim()) {
+                resolve(stdout.trim().split(/\r?\n/)[0]);
+                return;
+            }
+            const fallback = fallbackOllamaPaths().find((p) => {
+                try {
+                    return fs.existsSync(p);
+                } catch (e) {
+                    return false;
+                }
+            });
+            resolve(fallback || null);
+        });
     });
 }
 
@@ -74,9 +109,9 @@ function waitForServer(timeoutMs = 30000, intervalMs = 500) {
     });
 }
 
-function startOllamaServe() {
+function startOllamaServe(command) {
     sendStatus("Starting Ollama server…");
-    const child = spawn("ollama", ["serve"], {
+    const child = spawn(command, ["serve"], {
         // On Windows we don't detach (taskkill /t handles the tree).
         // On mac/linux we detach so the child becomes its own process
         // group leader, which lets us kill the whole group on quit.
@@ -118,32 +153,37 @@ function killOllama() {
 }
 
 async function initOllama() {
-    sendStatus("Checking for Ollama…");
-    const installed = await checkOllamaInstalled();
-    if (!installed) {
-        sendStatus(
-            "Ollama isn't installed. Install it from ollama.com, then restart the app.",
-            { error: true }
-        );
-        return;
-    }
+    try {
+        sendStatus("Checking for Ollama…");
+        const command = await resolveOllamaCommand();
+        if (!command) {
+            sendStatus(
+                "Ollama isn't installed (or isn't on PATH). Install it from ollama.com, then click Retry.",
+                { error: true }
+            );
+            return;
+        }
 
-    sendStatus("Checking if Ollama server is running…");
-    let up = await checkServerUp();
+        sendStatus("Checking if Ollama server is running…");
+        let up = await checkServerUp();
 
-    if (!up) {
-        startOllamaServe();
-        sendStatus("Waiting for Ollama server to start…");
-        up = await waitForServer();
-    }
+        if (!up) {
+            startOllamaServe(command);
+            sendStatus("Waiting for Ollama server to start…");
+            up = await waitForServer();
+        }
 
-    if (up) {
-        sendStatus("Ollama server running", { ready: true });
-    } else {
-        sendStatus(
-            "Ollama server didn't start in time. Check your Ollama installation.",
-            { error: true }
-        );
+        if (up) {
+            sendStatus("Ollama server running", { ready: true });
+        } else {
+            sendStatus(
+                "Ollama server didn't start in time. Check your Ollama installation.",
+                { error: true }
+            );
+        }
+    } catch (err) {
+        console.error("initOllama failed:", err);
+        sendStatus("Unexpected error starting Ollama: " + err.message, { error: true });
     }
 }
 

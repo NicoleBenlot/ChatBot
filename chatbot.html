@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>ChatBot</title>
-<link rel="icon" href="icon.png">
+<link rel="icon" href="favicon.ico">
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; connect-src http://127.0.0.1:11434 http://localhost:11434;">
 <link rel="stylesheet" href="chatbot.css">
 </head>
@@ -22,7 +22,7 @@
 <div id="appRoot" class="hidden">
 
 <header>
-  <div class="brand"><span class="dot"></span>ChatBot</div>
+  <div class="brand"><img class="brand-icon" src="favicon.ico" alt="">ChatBot</div>
   <div class="header-controls">
     <select id="modelSelect"><option>Loading models…</option></select>
     <button class="icon-btn" id="settingsBtn" title="Settings">
@@ -39,7 +39,7 @@
 
 <div id="messages">
   <div class="empty-state" id="emptyState">
-    <div class="dot"></div>
+    <img class="empty-state-icon" src="favicon.ico" alt="">
     <h2>Welcome to ChatBot</h2>
     <p>Ask anything — everything runs locally through Ollama.</p>
   </div>
