@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>ChatBot</title>
-<link rel="icon" href="icon.png">
+<link rel="icon" href="favicon.ico">
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; connect-src http://127.0.0.1:11434 http://localhost:11434;">
 <link rel="stylesheet" href="chatbot.css">
 </head>
@@ -22,7 +22,7 @@
 <div id="appRoot" class="hidden">
 
 <header>
-  <div class="brand"><img class="brand-icon" src="icon.png" alt="">ChatBot</div>
+  <div class="brand"><img class="brand-icon" src="favicon.ico" alt="">ChatBot</div>
   <div class="header-controls">
     <select id="modelSelect"><option>Loading models…</option></select>
     <button class="icon-btn" id="settingsBtn" title="Settings">
@@ -31,32 +31,52 @@
   </div>
 </header>
 
-
 <div id="settingsPanel">
   <label>Ollama URL</label>
   <input type="text" id="ollamaUrl" value="http://localhost:11434">
   <div class="hint">If models fail to load, run Ollama with <code>OLLAMA_ORIGINS=*</code> set so this page is allowed to reach it.</div>
-</div>
 
-<div id="messages">
-  <div class="empty-state" id="emptyState">
-    <img class="empty-state-icon" src="icon.png" alt="">
-    <h2>Welcome to ChatBot</h2>
-    <p>Ask anything — everything runs locally through Ollama.</p>
+  <label>System prompt</label>
+  <textarea id="systemPrompt" rows="3" placeholder="Optional — instructions applied to every new message"></textarea>
+
+  <div class="field-row">
+    <label>Temperature</label>
+    <span id="temperatureValue" class="field-value">0.8</span>
   </div>
+  <input type="range" id="temperatureInput" min="0" max="2" step="0.1" value="0.8">
 </div>
 
-<div class="composer-wrap">
-  <div class="composer" id="composer">
-    <div class="chips" id="chips"></div>
-    <div class="composer-row">
-      <textarea id="promptInput" placeholder="Ask something…" rows="1"></textarea>
-      <button id="sendBtn" title="Send">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5"></path><path d="M5 12l7-7 7 7"></path></svg>
-      </button>
+<div class="app-body">
+  <aside id="historySidebar">
+    <button id="newChatBtn" type="button">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+      New chat
+    </button>
+    <div id="historyList"></div>
+  </aside>
+
+  <div class="chat-column">
+    <div id="messages">
+      <div class="empty-state" id="emptyState">
+        <img class="empty-state-icon" src="favicon.ico" alt="">
+        <h2>Welcome to ChatBot</h2>
+        <p>Ask anything — everything runs locally through Ollama.</p>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer" id="composer">
+        <div class="chips" id="chips"></div>
+        <div class="composer-row">
+          <textarea id="promptInput" placeholder="Ask something…" rows="1"></textarea>
+          <button id="sendBtn" title="Send">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5"></path><path d="M5 12l7-7 7 7"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div class="status-line" id="statusLine"></div>
     </div>
   </div>
-  <div class="status-line" id="statusLine"></div>
 </div>
 
 </div>
