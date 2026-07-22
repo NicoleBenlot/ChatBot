@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const { spawn, exec } = require("child_process");
 const http = require("http");
@@ -13,6 +13,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 900,
         height: 700,
+        icon: path.join(__dirname, "favicon.ico"),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,
@@ -152,6 +153,7 @@ ipcMain.on("retry-ollama-check", () => {
 });
 
 app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
     createWindow();
 
     mainWindow.webContents.once("did-finish-load", () => {

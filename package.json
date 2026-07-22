@@ -15,7 +15,8 @@
     "appId": "com.local.chatbot",
     "productName": "ChatBot",
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "favicon.ico"
     }
   }
 }
