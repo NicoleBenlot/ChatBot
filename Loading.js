@@ -4,6 +4,8 @@ const loadingActions = document.getElementById('loadingActions');
 const retryBtn = document.getElementById('retryBtn');
 const appRoot = document.getElementById('appRoot');
 
+let receivedAnyStatus = false;
+
 function showApp() {
   clearWatchdog();
   loadingScreen.classList.add('hide');
@@ -34,6 +36,32 @@ function clearWatchdog() {
   watchdog = null;
 }
 
+// Single handler for status updates, called either via the IPC bridge
+// (normal path) or via direct script injection from the main process
+// (fallback path, used if the preload/bridge failed to load).
+function applyStatus(data) {
+  receivedAnyStatus = true;
+  clearWatchdog();
+  if (loadingText) loadingText.textContent = data.message || '';
+
+  if (data.error) {
+    loadingScreen.classList.add('error');
+    loadingActions.classList.add('show');
+    return;
+  }
+
+  loadingScreen.classList.remove('error');
+  loadingActions.classList.remove('show');
+
+  if (data.ready) {
+    showApp();
+  } else {
+    // Still in progress — re-arm in case the next step stalls too.
+    armWatchdog();
+  }
+}
+window.__applyOllamaStatus = applyStatus;
+
 retryBtn.addEventListener('click', () => {
   loadingScreen.classList.remove('error');
   loadingActions.classList.remove('show');
@@ -42,34 +70,23 @@ retryBtn.addEventListener('click', () => {
     armWatchdog();
     window.ollamaBridge.retry();
   } else {
-    showApp();
+    // No bridge — nothing we can trigger from here, just wait and see
+    // if a status shows up (e.g. via the injection fallback again).
+    armWatchdog(8000);
   }
 });
 
 if (window.ollamaBridge) {
   armWatchdog();
-  window.ollamaBridge.onStatus((data) => {
-    clearWatchdog();
-    if (loadingText) loadingText.textContent = data.message || '';
-
-    if (data.error) {
-      loadingScreen.classList.add('error');
-      loadingActions.classList.add('show');
-      return;
-    }
-
-    loadingScreen.classList.remove('error');
-    loadingActions.classList.remove('show');
-
-    if (data.ready) {
-      showApp();
-    } else {
-      // Still in progress — re-arm in case the next step stalls too.
-      armWatchdog();
-    }
-  });
+  window.ollamaBridge.onStatus(applyStatus);
 } else {
-  // Not running inside Electron (e.g. opened directly in a browser) —
-  // skip the Ollama bootstrap and just show the app.
-  showApp();
+  // Bridge missing could mean: (a) this page is open directly in a
+  // regular browser tab with no Electron at all, or (b) we're in
+  // Electron but the preload script failed — in which case main.js's
+  // executeJavaScript fallback should still call applyStatus shortly.
+  // Give it a moment before assuming we're truly outside Electron.
+  armWatchdog(6000);
+  setTimeout(() => {
+    if (!receivedAnyStatus) showApp();
+  }, 1500);
 }

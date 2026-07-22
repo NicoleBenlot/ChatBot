@@ -13,7 +13,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 900,
         height: 700,
-        icon: path.join(__dirname, "icon.png"),
+        icon: path.join(__dirname, "favicon.ico"),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,
@@ -27,13 +27,33 @@ function createWindow() {
         mainWindow = null;
     });
 
+    mainWindow.webContents.on("preload-error", (event, preloadPath, error) => {
+        console.error("Preload script failed:", preloadPath, error);
+        sendStatus("Preload script failed to load: " + error.message, { error: true });
+    });
+
+    mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        // -3 is a benign "aborted" code (e.g. a superseded navigation), ignore it
+        if (!isMainFrame || errorCode === -3) return;
+        console.error("Page failed to load:", errorCode, errorDescription, validatedURL);
+        sendStatus("Interface failed to load (" + errorDescription + ").", { error: true });
+    });
+
     return mainWindow;
 }
 
 function sendStatus(message, extra = {}) {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("ollama-status", { message, ...extra });
-    }
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    const payload = { message, ...extra };
+
+    // Primary path: IPC to the preload bridge.
+    mainWindow.webContents.send("ollama-status", payload);
+
+    // Fallback path: inject directly into the page. This works even if
+    // the preload script failed to load for some reason, since it runs
+    // in the page's own world rather than depending on contextBridge.
+    const js = `window.__applyOllamaStatus && window.__applyOllamaStatus(${JSON.stringify(payload)});`;
+    mainWindow.webContents.executeJavaScript(js).catch(() => {});
 }
 
 // Quick ping to see if something is already answering on Ollama's port
