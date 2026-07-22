@@ -326,6 +326,9 @@ button.icon-btn:hover {
   animation: pulse 1.1s infinite ease-in-out;
   vertical-align: middle;
 }
+.msg-assistant.error {
+  color: #c0553d;
+}
 @keyframes pulse {
   0%,
   100% {

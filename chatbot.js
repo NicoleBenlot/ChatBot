@@ -337,6 +337,7 @@ function renderConversationMessages(conv) {
       const el = wrap.querySelector('.msg-assistant');
       el.innerHTML = renderMarkdown(m.content || '');
       el.classList.remove('pending');
+      if (m.error) el.classList.add('error');
     }
   });
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -540,6 +541,13 @@ async function send() {
       setStatus('Stopped.');
     } else {
       assistantEl.textContent = 'Something went wrong reaching Ollama.';
+      assistantEl.classList.add('error');
+      currentConversation.messages.push({
+        role: 'assistant',
+        content: 'Something went wrong reaching Ollama.',
+        error: true
+      });
+      saveCurrentConversation();
       setStatus(err.message, true);
     }
   } finally {
