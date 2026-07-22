@@ -57,7 +57,7 @@ https://nodejs.org/
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/NicoleBenlot/ChatBot.git
 cd ChatBot
 ```
 
