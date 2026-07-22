@@ -1,4 +1,4 @@
-    :root {
+:root {
   --bg: #faf9f5;
   --panel: #ffffff;
   --border: #e8e4d9;
@@ -320,4 +320,74 @@ button.icon-btn:hover {
 }
 .status-line.error {
   color: #c0553d;
+}
+
+/* Loading screen */
+#appRoot.hidden {
+  display: none;
+}
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+#loadingScreen.hide {
+  opacity: 0;
+}
+.loading-inner {
+  text-align: center;
+  max-width: 320px;
+  padding: 0 24px;
+}
+.spinner {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 18px auto;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+#loadingScreen.error .spinner {
+  border-top-color: #c0553d;
+  animation: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+#loadingText {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+#loadingScreen.error #loadingText {
+  color: #c0553d;
+}
+#loadingActions {
+  margin-top: 16px;
+  display: none;
+}
+#loadingActions.show {
+  display: block;
+}
+.loading-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.loading-btn:hover {
+  background: var(--accent-hover);
 }

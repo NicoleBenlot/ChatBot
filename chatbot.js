@@ -60,7 +60,7 @@ async function loadModels() {
     setStatus('Could not reach Ollama at ' + ollamaUrl() + ' — check the URL in settings.', true);
   }
 }
-loadModels();
+window.addEventListener('ollama-ready', loadModels, { once: true });
 ollamaUrlInput.addEventListener('change', loadModels);
 
 

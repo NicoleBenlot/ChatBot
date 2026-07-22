@@ -8,6 +8,18 @@
 </head>
 <body>
 
+<div id="loadingScreen">
+  <div class="loading-inner">
+    <div class="spinner"></div>
+    <p id="loadingText">Starting…</p>
+    <div id="loadingActions">
+      <button id="retryBtn" class="loading-btn">Retry</button>
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" class="hidden">
+
 <header>
   <div class="brand"><span class="dot"></span>ChatBot</div>
   <div class="header-controls">
@@ -44,6 +56,9 @@
   <div class="status-line" id="statusLine"></div>
 </div>
 
+</div>
+
+<script src="loading.js"></script>
 <script src="chatbot.js"></script>
 </body>
 </html>
