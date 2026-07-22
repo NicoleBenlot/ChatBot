@@ -13,7 +13,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 900,
         height: 700,
-        icon: path.join(__dirname, "favicon.ico"),
+        icon: path.join(__dirname, "icon.png"),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: false,

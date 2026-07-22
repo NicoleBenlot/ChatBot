@@ -21,12 +21,12 @@
       "chatbot.js",
       "chatbot.html",
       "chatbot.css",
-      "favicon.ico",
+      "icon.png",
       "package.json"
     ],
     "win": {
       "target": "nsis",
-      "icon": "favicon.ico"
+      "icon": "icon.png"
     }
   }
 }
