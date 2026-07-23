@@ -18,12 +18,30 @@ ChatBot takes a different approach. It focuses on providing a clean, lightweight
 
 ## Screenshots
 
+<<<<<<< HEAD
 | Main Interface | Chat Conversation | Settings |
 |:---:|:---:|:---:|
 | ![ChatBot main interface](images/home.png) | ![ChatBot chat window](images/chat.png) | ![ChatBot settings](images/settings.png) |
 
 ---
+=======
+---
+### Main Chat Interface
 
+![ChatBot main interface](images/home.png)
+
+---
+### Chat Conversation
+
+![ChatBot chat window](images/chat.png)
+
+---
+### Settings
+
+![ChatBot settings](images/settings.png)
+>>>>>>> a281e3d2cd3fbd80830f8903673e2792be5e8853
+
+---
 ## Features
 
 - Local AI chat powered by Ollama
