@@ -6,6 +6,8 @@ ChatBot provides a simple and modern way to interact with locally hosted AI mode
 
 Unlike many Ollama frontends, ChatBot focuses on simplicity. It automatically manages the Ollama server for you, so after installing Ollama and downloading a model, you can simply launch ChatBot and start chatting.
 
+> Made mostly for fun — I got tired of Ollama frontends that need a complicated setup or a heavy app just to send a chat message, so I built the simple interface I actually wanted.
+
 ---
 
 ## Why ChatBot?
@@ -23,6 +25,7 @@ ChatBot takes a different approach. It focuses on providing a clean, lightweight
 | ![ChatBot main interface](images/home.png) | ![ChatBot chat window](images/chat.png) | ![ChatBot settings](images/settings.png) |
 
 ---
+
 ## Features
 
 - Local AI chat powered by Ollama
