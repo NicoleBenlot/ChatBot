@@ -18,17 +18,11 @@ ChatBot takes a different approach. It focuses on providing a clean, lightweight
 
 ## Screenshots
 
-### Main Chat Interface
+| Main Interface | Chat Conversation | Settings |
+|:---:|:---:|:---:|
+| ![ChatBot main interface](images/home.png) | ![ChatBot chat window](images/chat.png) | ![ChatBot settings](images/settings.png) |
 
-![ChatBot main interface](images/home.png)
-
-### Chat Conversation
-
-![ChatBot chat window](images/chat.png)
-
-### Settings
-
-![ChatBot settings](images/settings.png)
+---
 
 ## Features
 
@@ -63,6 +57,7 @@ Before using ChatBot, make sure you have:
 - At least one Ollama model downloaded
 
 For developers who want to modify the application, see the source installation instructions below.
+
 ---
 
 ## Requirements
