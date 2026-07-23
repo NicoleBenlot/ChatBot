@@ -334,7 +334,7 @@ messagesEl.addEventListener('click', (e) => {
 
 function clearMessagesDOM() {
   messagesEl.innerHTML = `<div class="empty-state" id="emptyState">
-    <img class="empty-state-icon" src="icon.png" alt="">
+    <img class="empty-state-icon" src="icon.svg" alt="">
     <h2>Welcome to ChatBot</h2>
     <p>Ask anything — everything runs locally through Ollama.</p>
   </div>`;
