@@ -52,6 +52,19 @@ ChatBot takes a different approach. It focuses on providing a clean, lightweight
 
 ---
 
+## Downloads
+
+Download the latest Windows installer from the [GitHub Releases](https://github.com/NicoleBenlot/ChatBot/releases) page.
+
+The installer includes everything required to run ChatBot.
+
+Before using ChatBot, make sure you have:
+- Ollama installed
+- At least one Ollama model downloaded
+
+For developers who want to modify the application, see the source installation instructions below.
+---
+
 ## Requirements
 
 - Windows 10 or later
