@@ -287,8 +287,8 @@ Recommended:
 Models:
 
 
-phi3
-llama3.2:3b
+- phi3
+- llama3.2:3b
 
 
 ---
@@ -305,8 +305,8 @@ Recommended:
 Models:
 
 
-llama3.2:3b
-qwen2.5
+- llama3.2:3b
+- qwen2.5
 
 
 ---
