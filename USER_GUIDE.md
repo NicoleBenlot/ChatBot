@@ -277,49 +277,54 @@ ollama pull llama3.2
 
 ## Basic Usage
 
+Suitable for lightweight models and CPU-only inference.
+
 Recommended:
 
-- 8GB RAM
-- CPU inference
+- 8GB RAM or more
+- Modern CPU
 
 Models:
 
-```
+
 phi3
 llama3.2:3b
-```
+
 
 ---
 
 ## Recommended Experience
 
+For faster responses and larger models.
+
 Recommended:
 
-- 16GB RAM
-- Dedicated GPU
+- 16GB+ RAM (varies depending on model size)
+- Dedicated GPU recommended
 
 Models:
 
-```
-llama3.2
-mistral
-llava
-```
+
+llama3.2:3b
+qwen2.5
+
 
 ---
 
 ## Vision AI
 
+Image understanding models require additional resources.
+
 Recommended:
 
 - Dedicated GPU
-- 8GB+ VRAM
+- 8GB+ VRAM recommended
 
 ---
 
 # Privacy
 
-ChatBot runs locally.
+ChatBot runs locally using Ollama.
 
 Your:
 
@@ -327,4 +332,6 @@ Your:
 - prompts
 - images
 
-remain on your computer unless you manually connect to an external service.
+remain on your computer unless you manually configure ChatBot to connect to an external service.
+
+No cloud account is required, and your data is not sent anywhere as its run on your local machine.

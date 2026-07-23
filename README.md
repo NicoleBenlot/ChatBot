@@ -220,20 +220,6 @@ See **USER_GUIDE.md** for:
 
 ---
 
-## Roadmap
-
-Planned improvements include:
-
-- Search conversations
-- Rename chats
-- Export conversations
-- Auto-update support
-- Additional customization options
-
-Feature requests and contributions are always welcome.
-
----
-
 ## License
 
 This project is licensed under the MIT License.
