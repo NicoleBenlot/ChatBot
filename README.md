@@ -1,38 +1,77 @@
 # ChatBot
 
-A lightweight desktop chatbot application powered by Ollama.
+A lightweight Windows desktop chat interface for Ollama.
 
-ChatBot provides a simple local interface for interacting with locally hosted AI models. It runs as a Windows desktop application using Electron and connects directly to your local Ollama server.
+ChatBot provides a simple and modern way to interact with locally hosted AI models. Built with Electron, it connects directly to your local Ollama server so you can chat privately on your own hardware without relying on cloud services.
+
+Unlike many Ollama frontends, ChatBot focuses on simplicity. It automatically manages the Ollama server for you, so after installing Ollama and downloading a model, you can simply launch ChatBot and start chatting.
+
+---
+
+## Why ChatBot?
+
+Many Ollama interfaces are designed for advanced users and include a wide range of features and configuration options.
+
+ChatBot takes a different approach. It focuses on providing a clean, lightweight desktop experience with minimal setup, allowing you to start chatting with your local AI models in just a few minutes.
+
+---
+
+## Screenshots
+
+### Main Chat Interface
+
+![ChatBot main interface](images/home.png)
+
+### Chat Conversation
+
+![ChatBot chat window](images/chat.png)
+
+### Settings
+
+![ChatBot settings](images/settings.png)
 
 ## Features
 
-- Desktop application built with Electron
-- Local AI inference through Ollama
-- **Automatically starts and stops the Ollama server** — no need to run `ollama serve` manually
-- Model selection from installed Ollama models
+- Local AI chat powered by Ollama
+- Automatically starts and stops the Ollama server
+- Automatic detection of installed models
+- Persistent conversation history
 - Streaming responses
-- Image support for vision models
-- Drag and drop image input
+- Markdown-formatted responses
+- Syntax-highlighted code blocks with one-click copy
+- Copy any assistant response
+- Stop generation while a response is streaming
+- Custom system prompt
+- Adjustable temperature
+- Vision model support
+- Drag-and-drop image uploads
 - Clipboard image pasting
-- Lightweight interface
-- No cloud dependency
+- Configurable Ollama endpoint
+- Lightweight desktop interface
+- No cloud dependency — everything runs locally
+
+---
 
 ## Requirements
 
-### Ollama
+- Windows 10 or later
+- Ollama installed
+- At least one downloaded model
 
-Install Ollama and make sure it's available on your system `PATH`:
+Download Ollama:
 
 https://ollama.com/
 
-You do **not** need to run `ollama serve` yourself. When ChatBot launches, it:
+You do **not** need to run `ollama serve` manually.
 
-1. Checks that `ollama` is installed
-2. Checks if the Ollama server is already running
-3. If not, starts `ollama serve` in the background and waits for it to come up
-4. Shows a loading screen with status text the whole time (with a Retry button if something goes wrong)
+When ChatBot launches, it automatically:
 
-When you close ChatBot, it shuts down the Ollama server it started for you — **only if it started it**. If Ollama was already running before you opened ChatBot (e.g. you started it yourself, or another app is using it), ChatBot leaves it running and won't kill it on exit.
+1. Checks whether Ollama is installed.
+2. Detects whether the Ollama server is already running.
+3. Starts the server if necessary.
+4. Waits until it's ready while displaying live status updates.
+
+If ChatBot started the server, it shuts it down when the application closes. If Ollama was already running before ChatBot launched, it leaves it running.
 
 Download a model:
 
@@ -40,15 +79,17 @@ Download a model:
 ollama pull llama3.2
 ```
 
-For image support, install a vision model:
+For image understanding:
 
 ```bash
 ollama pull llava
 ```
 
+---
+
 ## Installation
 
-### Running from source
+### Run from Source
 
 Install Node.js:
 
@@ -57,7 +98,7 @@ https://nodejs.org/
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/NicoleBenlot/ChatBot.git
 cd ChatBot
 ```
 
@@ -67,74 +108,77 @@ Install dependencies:
 npm install
 ```
 
-Start the application:
+Run the application:
 
 ```bash
 npm start
 ```
 
-## Building the Windows Application
+---
 
-Build the executable:
+## Building
+
+Build the application:
 
 ```bash
 npm run build
 ```
 
-The output will be generated in:
+The generated files will appear in:
 
-```
+```text
 dist/
 ```
 
-Depending on the configuration, the build will create:
+Depending on your build configuration, this may include:
 
 - Windows installer (`Setup.exe`)
 - Portable executable (`.exe`)
 
+---
+
 ## Project Structure
 
-```
+```text
 ChatBot/
 │
-├── chatbot.html       Main interface
-├── chatbot.css        Application styling
-├── chatbot.js         Frontend chat logic
-├── loading.js         Loading screen logic (listens for Ollama status)
+├── chatbot.html
+├── chatbot.css
+├── chatbot.js
+├── loading.js
 │
-├── main.js            Electron main process (manages the Ollama server lifecycle)
-├── preload.js         Secure bridge between main process and renderer
-├── package.json       Project configuration
+├── main.js
+├── preload.js
+├── package.json
 │
-└── dist/              Build output
+└── dist/
 ```
+
+---
 
 ## Configuration
 
-The default Ollama endpoint is:
+By default, ChatBot connects to:
 
-```
+```text
 http://localhost:11434
 ```
 
-The endpoint can be changed from the settings menu inside the application.
+The endpoint can be changed from **Settings** if you want to connect to a different Ollama server.
+
+---
 
 ## Troubleshooting
 
-### App is stuck on the loading screen
+### Stuck on the loading screen
 
-ChatBot shows what it's doing (checking for Ollama, starting the server, waiting for it to respond). If it errors out, a **Retry** button appears. Common causes:
+ChatBot displays exactly what it's doing while starting Ollama. If an error occurs, a **Retry** button will appear.
 
-- Ollama isn't installed, or isn't on your system `PATH`
-- Something else is already using port `11434` and isn't actually Ollama
+Common causes include:
 
-Check installed models directly:
-
-```bash
-ollama list
-```
-
-### Models are not loading (app is open)
+- Ollama isn't installed.
+- The `ollama` command isn't available in your system PATH.
+- Another application is already using port `11434`.
 
 Check installed models:
 
@@ -142,37 +186,54 @@ Check installed models:
 ollama list
 ```
 
-If none are installed, pull one:
+### No models appear
+
+Install a model:
 
 ```bash
 ollama pull llama3.2
 ```
 
+Restart ChatBot if necessary.
+
 ### Connection errors
 
-Test Ollama:
+Verify that Ollama is responding:
 
 ```bash
 curl http://localhost:11434/api/tags
 ```
 
-If this fails while ChatBot is open, something's blocking the connection (firewall, custom `OLLAMA_HOST`, etc.) — check the URL in ChatBot's settings panel.
+If the request fails while ChatBot is running, verify your Ollama configuration or the endpoint configured in ChatBot.
 
-## Technology Stack
+---
 
-- Electron
-- Node.js
-- HTML
-- CSS
-- JavaScript
-- Ollama API
+## Documentation
 
-## User Guide
+See **USER_GUIDE.md** for:
 
-For installation instructions, model setup, and troubleshooting:
+- Installation walkthrough
+- Recommended models
+- Usage guide
+- Troubleshooting
+- Hardware recommendations
 
-See:
+---
 
-```
-USER_GUIDE.md
-```
+## Roadmap
+
+Planned improvements include:
+
+- Search conversations
+- Rename chats
+- Export conversations
+- Auto-update support
+- Additional customization options
+
+Feature requests and contributions are always welcome.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
