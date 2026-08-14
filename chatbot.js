@@ -264,7 +264,7 @@ function renderMarkdown(raw) {
   }
 
   for (const line of lines) {
-    const codeholderMatch = line.match(/^\u0000CODEBLOCK(\d+)\u0000$/);
+    const codeholderMatch = line.match(/^\s*\u0000CODEBLOCK(\d+)\u0000\s*$/);
     const headerMatch = !codeholderMatch && line.match(/^(#{1,4})\s+(.*)/);
     const ulMatch = !codeholderMatch && !headerMatch && line.match(/^\s*[-*]\s+(.*)/);
     const olMatch = !codeholderMatch && !headerMatch && !ulMatch && line.match(/^\s*\d+\.\s+(.*)/);
@@ -627,3 +627,15 @@ sendBtn.addEventListener('click', () => {
     send();
   }
 });
+
+
+window.addEventListener('ollama-ready', async () => {
+  if (!window.updateBridge) return;
+  const result = await window.updateBridge.check();
+  if (result.hasUpdate) {
+    const banner = document.createElement('div');
+    banner.id = 'updateBanner';
+    banner.innerHTML = `New version available: v${result.latestVersion} — <a href="${result.url}" target="_blank" rel="noopener">Download</a>`;
+    document.body.prepend(banner);
+  }
+}, { once: true });
