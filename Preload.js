@@ -18,3 +18,8 @@ contextBridge.exposeInMainWorld("settingsBridge", {
     load: () => ipcRenderer.invoke("settings:load"),
     save: (settings) => ipcRenderer.invoke("settings:save", settings)
 });
+
+
+contextBridge.exposeInMainWorld('updateBridge', {
+  check: () => ipcRenderer.invoke('check-for-update')
+});

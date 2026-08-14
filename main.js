@@ -332,3 +332,54 @@ app.on("window-all-closed", () => {
 app.on("before-quit", () => {
     killOllama();
 });
+
+
+const { app, ipcMain } = require('electron');
+const https = require('https');
+
+// Compares two semver-ish strings like "1.10.2" vs "1.9.0".
+// Returns 1 if a > b, -1 if a < b, 0 if equal.
+function compareVersions(a, b) {
+  const pa = a.split('.').map(n => parseInt(n, 10) || 0);
+  const pb = b.split('.').map(n => parseInt(n, 10) || 0);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
+}
+
+function checkForUpdate() {
+  return new Promise((resolve) => {
+    const req = https.get({
+      hostname: 'api.github.com',
+      path: '/repos/NicoleBenlot/ChatBot/releases/latest',
+      headers: { 'User-Agent': 'ChatBot-App' }
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const latestTag = (json.tag_name || '').replace(/^v/, '');
+          const currentVersion = app.getVersion();
+          resolve({
+            hasUpdate: !!latestTag && compareVersions(latestTag, currentVersion) > 0,
+            latestVersion: latestTag,
+            currentVersion,
+            url: json.html_url || 'https://github.com/NicoleBenlot/ChatBot/releases'
+          });
+        } catch (e) {
+          resolve({ hasUpdate: false });
+        }
+      });
+    });
+    req.on('error', () => resolve({ hasUpdate: false }));
+    req.setTimeout(5000, () => { req.destroy(); resolve({ hasUpdate: false }); });
+  });
+}
+
+ipcMain.handle('check-for-update', () => checkForUpdate());
