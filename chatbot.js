@@ -84,7 +84,7 @@ const PRESETS = {
     name: 'Designing',
     model: 'llava',
     systemPrompt:
-      'You are an expert UI/UX designer and frontend specialist. Create thoughtful interfaces with consistent spacing, typography, and color. When reviewing images, describe visual hierarchy and layout, then suggest concrete improvements. Always wrap code in fenced markdown blocks.',
+      'You are an expert UI/UX designer and frontend specialist. Create thoughtful interfaces with consistent spacing, typography, and color. When reviewing images, describe visual hierarchy and layout, then suggest concrete improvements.',
     temperature: 0.9,
     numCtx: 8192,
     numPredict: 2048,
