@@ -175,6 +175,40 @@ ollama rm llama3.2
 
 ---
 
+## Presets and generation settings
+
+The **Settings** panel (gear icon in the top-right) controls how the selected model responds. Start from a **preset** and fine-tune from there:
+
+| Preset | Best for | Model suggestion |
+|:---|:---|:---|
+| General | Everyday conversation | — (keep current) |
+| Coding | Writing and reviewing code | `qwen2.5-coder:3b` |
+| Designing | UI/UX work and image review | `llava` |
+| Custom — Coding · RTX 3050 | Your own tuned configuration | `qwen2.5-coder:3b` |
+
+### How presets work
+
+1. Open Settings
+2. Pick a preset from the **Preset** dropdown
+3. ChatBot fills in the model, system prompt, and generation options for that style
+
+Presets only select models you have installed. If a preset's suggested model isn't available, it's clearly marked in the **Model** dropdown so you can see the suggestion without ChatBot switching you away from your current model.
+
+### Full configuration
+
+After choosing a preset (or on its own), every setting is editable:
+
+- **Model** — chosen from your installed Ollama models.
+- **Temperature** — controls randomness. `0` makes replies deterministic, values toward `2` make them more creative.
+- **Context length (tokens)** — `num_ctx`; how much of the recent conversation the model sees. Higher uses more VRAM/RAM.
+- **Max tokens** — `num_predict`; caps how long a single reply can be. Leave blank to use the model's default.
+- **Keep alive** — `keep_alive`; how long a model stays loaded in memory after replying. `0` unloads it right away, `-1` keeps it loaded until Ollama exits, and values like `5m` or `15m` keep it warm for that long.
+- **System prompt** — instructions applied to every new message.
+
+Your settings are saved automatically and restored the next time you open ChatBot.
+
+---
+
 # Sending Images
 
 Vision models support image input.

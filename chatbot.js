@@ -12,6 +12,11 @@ const ollamaUrlInput = document.getElementById('ollamaUrl');
 const systemPromptInput = document.getElementById('systemPrompt');
 const temperatureInput = document.getElementById('temperatureInput');
 const temperatureValueEl = document.getElementById('temperatureValue');
+const presetSelect = document.getElementById('presetSelect');
+const presetModelInput = document.getElementById('presetModelInput');
+const numCtxInput = document.getElementById('numCtxInput');
+const numPredictInput = document.getElementById('numPredictInput');
+const keepAliveInput = document.getElementById('keepAliveInput');
 const codeStyleToggle = document.getElementById('codeStyleToggle');
 const newChatBtn = document.getElementById('newChatBtn');
 const historyListEl = document.getElementById('historyList');
@@ -53,18 +58,100 @@ document.addEventListener('click', (e) => {
 });
 
 // ---------------------------------------------------------------------
-// Settings persistence (Ollama URL, system prompt, temperature)
+// Generation presets
+// ---------------------------------------------------------------------
+const PRESETS = {
+  general: {
+    name: 'General',
+    model: '',
+    systemPrompt: '',
+    temperature: 0.7,
+    numCtx: 8192,
+    numPredict: 0,
+    keepAlive: '5m'
+  },
+  coding: {
+    name: 'Coding',
+    model: 'qwen2.5-coder:3b',
+    systemPrompt:
+      'You are a senior software engineer. Write clean, efficient, and maintainable code. When code is involved, provide the full solution in a fenced code block with the language specified, and keep explanations concise.',
+    temperature: 0.2,
+    numCtx: 16384,
+    numPredict: 2048,
+    keepAlive: '15m'
+  },
+  designing: {
+    name: 'Designing',
+    model: 'llava',
+    systemPrompt:
+      'You are an expert UI/UX designer and frontend specialist. Create thoughtful interfaces with consistent spacing, typography, and color. When reviewing images, describe visual hierarchy and layout, then suggest concrete improvements. Always wrap code in fenced markdown blocks.',
+    temperature: 0.9,
+    numCtx: 8192,
+    numPredict: 2048,
+    keepAlive: '10m'
+  },
+  custom: {
+    name: 'Custom — Coding · RTX 3050',
+    model: 'qwen2.5-coder:3b',
+    systemPrompt:
+      'You are an expert AI software engineer. Provide direct, highly optimized, and clean code solutions. Minimize conversational filler and explanations. Always wrap code blocks in markdown syntax.',
+    temperature: 0.0,
+    numCtx: 16384,
+    numPredict: 2048,
+    keepAlive: '15m'
+  }
+};
+
+let savedModelSetting = '';
+
+function selectModelInBar(model) {
+  if (!model) return;
+  savedModelSetting = model;
+  const settingsHas = [...presetModelInput.options].some(o => o.value === model);
+  if (!settingsHas) {
+    const opt = document.createElement('option');
+    opt.value = model;
+    opt.textContent = model + ' (not installed)';
+    presetModelInput.appendChild(opt);
+  }
+  presetModelInput.value = model;
+  const headerHas = [...modelSelect.options].some(o => o.value === model);
+  if (headerHas) modelSelect.value = model;
+}
+
+function applyPreset(name, save = true) {
+  const p = PRESETS[name];
+  if (!p) return;
+  presetSelect.value = name;
+  if (p.model) selectModelInBar(p.model);
+  systemPromptInput.value = p.systemPrompt || '';
+  temperatureInput.value = p.temperature;
+  temperatureValueEl.textContent = p.temperature;
+  numCtxInput.value = p.numCtx;
+  numPredictInput.value = p.numPredict || '';
+  keepAliveInput.value = p.keepAlive;
+  setStatus('');
+  if (save) persistSettings();
+}
+
+// ---------------------------------------------------------------------
+// Settings persistence (Ollama URL, presets, generation options)
 // ---------------------------------------------------------------------
 const settingsReadyPromise = (async () => {
   if (!window.settingsBridge) return;
   try {
     const s = await window.settingsBridge.load();
     if (s && s.ollamaUrl) ollamaUrlInput.value = s.ollamaUrl;
+    if (s && typeof s.preset === 'string' && PRESETS[s.preset]) presetSelect.value = s.preset;
+    if (s && typeof s.model === 'string') savedModelSetting = s.model;
     if (s && typeof s.systemPrompt === 'string') systemPromptInput.value = s.systemPrompt;
     if (s && typeof s.temperature === 'number') {
       temperatureInput.value = s.temperature;
       temperatureValueEl.textContent = s.temperature;
     }
+    if (s && typeof s.numCtx === 'number' && s.numCtx) numCtxInput.value = s.numCtx;
+    if (s && typeof s.numPredict === 'number' && s.numPredict) numPredictInput.value = s.numPredict;
+    if (s && typeof s.keepAlive === 'string') keepAliveInput.value = s.keepAlive;
     if (s && typeof s.styledCodeBlocks === 'boolean') {
       codeStyleToggle.checked = s.styledCodeBlocks;
     }
@@ -76,18 +163,35 @@ const settingsReadyPromise = (async () => {
 function persistSettings() {
   if (!window.settingsBridge) return;
   window.settingsBridge.save({
+    preset: presetSelect.value,
     ollamaUrl: ollamaUrlInput.value,
+    model: savedModelSetting,
     systemPrompt: systemPromptInput.value,
     temperature: parseFloat(temperatureInput.value),
+    numCtx: parseInt(numCtxInput.value, 10) || 0,
+    numPredict: parseInt(numPredictInput.value, 10) || 0,
+    keepAlive: keepAliveInput.value.trim(),
     styledCodeBlocks: codeStyleToggle.checked
   });
 }
 ollamaUrlInput.addEventListener('change', persistSettings);
+presetSelect.addEventListener('change', () => applyPreset(presetSelect.value));
+presetModelInput.addEventListener('change', () => {
+  const model = presetModelInput.value;
+  if (!model) return;
+  savedModelSetting = model;
+  const headerHas = [...modelSelect.options].some(o => o.value === model);
+  if (headerHas) modelSelect.value = model;
+  persistSettings();
+});
 systemPromptInput.addEventListener('change', persistSettings);
 temperatureInput.addEventListener('input', () => {
   temperatureValueEl.textContent = temperatureInput.value;
 });
 temperatureInput.addEventListener('change', persistSettings);
+numCtxInput.addEventListener('change', persistSettings);
+numPredictInput.addEventListener('change', persistSettings);
+keepAliveInput.addEventListener('change', persistSettings);
 codeStyleToggle.addEventListener('change', () => {
   persistSettings();
   // Re-render whatever's currently on screen so the change is visible
@@ -110,6 +214,7 @@ async function loadModels() {
     const data = await res.json();
     const models = (data.models || []).map(m => m.name);
     if (!models.length) {
+      presetModelInput.innerHTML = '<option value="">No models found</option>';
       modelSelect.innerHTML = '<option>No models found</option>';
       return;
     }
@@ -123,7 +228,21 @@ async function loadModels() {
     if (currentConversation.model && models.includes(currentConversation.model)) {
       modelSelect.value = currentConversation.model;
     }
+    presetModelInput.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+    if (savedModelSetting && models.includes(savedModelSetting)) {
+      presetModelInput.value = savedModelSetting;
+      if (!currentConversation.model) modelSelect.value = savedModelSetting;
+    } else if (savedModelSetting) {
+      const opt = document.createElement('option');
+      opt.value = savedModelSetting;
+      opt.textContent = savedModelSetting + ' (not installed)';
+      presetModelInput.appendChild(opt);
+      presetModelInput.value = savedModelSetting;
+    } else {
+      presetModelInput.value = modelSelect.value;
+    }
   } catch (err) {
+    presetModelInput.innerHTML = '<option value="">Unavailable</option>';
     modelSelect.innerHTML = '<option>Unavailable</option>';
     setStatus('Could not reach Ollama at ' + ollamaUrl() + ' — check the URL in settings.', true);
   }
@@ -135,8 +254,13 @@ window.addEventListener('ollama-ready', async () => {
 ollamaUrlInput.addEventListener('change', loadModels);
 
 modelSelect.addEventListener('change', () => {
-  if (isStreaming) return; // don't stomp on an in-progress "Thinking…"/error status
   const model = modelSelect.value;
+  if (model && [...presetModelInput.options].some(o => o.value === model)) {
+    savedModelSetting = model;
+    presetModelInput.value = model;
+    persistSettings();
+  }
+  if (isStreaming) return; // don't stomp on an in-progress "Thinking…"/error status
   if (model && !warmedModels.has(model)) {
     setStatus(`Switched to ${model} — its first reply may take longer while Ollama loads it into memory.`);
   } else {
@@ -527,15 +651,19 @@ async function send() {
     if (sys) requestMessages.push({ role: 'system', content: sys });
     requestMessages.push(...currentConversation.messages);
 
+    const options = { temperature: parseFloat(temperatureInput.value) };
+    const numCtx = parseInt(numCtxInput.value, 10);
+    if (numCtx) options.num_ctx = numCtx;
+    const numPredict = parseInt(numPredictInput.value, 10);
+    if (numPredict) options.num_predict = numPredict;
+    const keepAlive = keepAliveInput.value.trim();
+    const payload = { model, stream: true, messages: requestMessages, options };
+    if (keepAlive) payload.keep_alive = keepAlive;
+
     const res = await fetch(ollamaUrl() + '/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        stream: true,
-        messages: requestMessages,
-        options: { temperature: parseFloat(temperatureInput.value) }
-      }),
+      body: JSON.stringify(payload),
       signal: activeAbortController.signal
     });
     if (!res.ok) {

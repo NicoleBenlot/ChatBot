@@ -39,6 +39,9 @@ ChatBot takes a different approach. It focuses on providing a clean, lightweight
 - Stop generation while a response is streaming
 - Custom system prompt
 - Adjustable temperature
+- Generation presets (General, Coding, Designing, and your own Custom preset)
+- Installed-model dropdown in settings that presets use to pick a model
+- Full generation control: context length (`num_ctx`), max tokens (`num_predict`), and keep-alive (`keep_alive`)
 - Vision model support
 - Drag-and-drop image uploads
 - Clipboard image pasting
@@ -175,6 +178,28 @@ http://localhost:11434
 ```
 
 The endpoint can be changed from **Settings** if you want to connect to a different Ollama server.
+
+### Presets and generation settings
+
+The **Settings** panel groups everything that affects how a model replies. Start from a **preset** and fine-tune from there:
+
+| Preset | Best for | Model suggestion |
+|:---|:---|:---|
+| General | Everyday conversation | — (keep current) |
+| Coding | Writing and reviewing code | `qwen2.5-coder:3b` |
+| Designing | UI/UX work and image review | `llava` |
+| Custom — Coding · RTX 3050 | Your own tuned configuration | `qwen2.5-coder:3b` |
+
+Picking a preset fills in the model, system prompt, and generation options. Presets only ever use models that are already installed — if a suggested model isn't available it's shown as such in the model dropdown rather than forcing a switch.
+
+Beyond presets, every option is fully editable:
+
+- **Model** — chosen from your installed Ollama models.
+- **Temperature** — randomness of the output (`0` = deterministic, `2` = very random).
+- **Context length** — `num_ctx`, how many tokens of recent conversation are sent to the model.
+- **Max tokens** — `num_predict`, the limit for a single reply (blank = model default).
+- **Keep alive** — `keep_alive`, how long the model stays loaded in memory after replying (`0` unloads immediately, `-1` keeps it until Ollama exits).
+- **System prompt** — instructions applied to every new message.
 
 ---
 

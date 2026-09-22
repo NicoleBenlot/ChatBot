@@ -142,6 +142,19 @@ button.icon-btn:hover {
   resize: vertical;
   margin: 12px 0 4px 0;
 }
+#settingsPanel select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+#settingsPanel input[type="number"] {
+  margin-bottom: 4px;
+}
 #settingsPanel .field-row {
   display: flex;
   justify-content: space-between;

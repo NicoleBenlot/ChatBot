@@ -36,14 +36,39 @@
   <input type="text" id="ollamaUrl" value="http://localhost:11434">
   <div class="hint">If models fail to load, run Ollama with <code>OLLAMA_ORIGINS=*</code> set so this page is allowed to reach it.</div>
 
-  <label>System prompt</label>
-  <textarea id="systemPrompt" rows="3" placeholder="Optional — instructions applied to every new message"></textarea>
+  <label>Preset</label>
+  <select id="presetSelect">
+    <option value="general">General</option>
+    <option value="coding">Coding</option>
+    <option value="designing">Designing</option>
+    <option value="custom">Custom — Coding · RTX 3050</option>
+  </select>
+  <div class="hint">Applies a model, system prompt and generation settings. Everything below stays fully editable afterwards.</div>
+
+  <label>Model</label>
+  <select id="presetModelInput"><option value="">Loading models…</option></select>
+  <div class="hint">Lists the models in your local Ollama manifest. Picking one here also updates the top bar.</div>
 
   <div class="field-row">
     <label>Temperature</label>
-    <span id="temperatureValue" class="field-value">0.8</span>
+    <span id="temperatureValue" class="field-value">0.7</span>
   </div>
-  <input type="range" id="temperatureInput" min="0" max="2" step="0.1" value="0.8">
+  <input type="range" id="temperatureInput" min="0" max="2" step="0.1" value="0.7">
+
+  <label>Context length (tokens)</label>
+  <input type="number" id="numCtxInput" min="256" step="256" value="8192" placeholder="8192">
+  <div class="hint">Sent as <code>num_ctx</code>. Higher uses more VRAM/RAM.</div>
+
+  <label>Max tokens (blank = model default)</label>
+  <input type="number" id="numPredictInput" min="0" step="1" placeholder="e.g. 2048">
+  <div class="hint">Sent as <code>num_predict</code>. Leave blank to let the model decide.</div>
+
+  <label>Keep alive</label>
+  <input type="text" id="keepAliveInput" value="5m" placeholder="e.g. 15m">
+  <div class="hint">Sent as <code>keep_alive</code>: how long the model stays loaded after replying. <code>0</code> unloads it right away, <code>-1</code> keeps it loaded until Ollama exits.</div>
+
+  <label>System prompt</label>
+  <textarea id="systemPrompt" rows="3" placeholder="Optional — instructions applied to every new message"></textarea>
 
   <div class="field-row">
     <label for="codeStyleToggle">Styled code blocks</label>

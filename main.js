@@ -334,7 +334,6 @@ app.on("before-quit", () => {
 });
 
 
-const { app, ipcMain } = require('electron');
 const https = require('https');
 
 // Compares two semver-ish strings like "1.10.2" vs "1.9.0".
