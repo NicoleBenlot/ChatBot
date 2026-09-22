@@ -94,7 +94,7 @@ const PRESETS = {
     name: 'Custom — Coding · RTX 3050',
     model: 'qwen2.5-coder:3b',
     systemPrompt:
-      'You are an expert AI software engineer. Provide direct, highly optimized, and clean code solutions. Minimize conversational filler and explanations. Always wrap code blocks in markdown syntax.',
+      'You are an expert AI software engineer. Provide direct, highly optimized, and clean code solutions. Minimize conversational filler and explanations.',
     temperature: 0.0,
     numCtx: 16384,
     numPredict: 2048,
